@@ -92,20 +92,12 @@ public class MainActivity extends AppCompatActivity {
 
     //授权，开启悬浮窗
     public void startFloatingService(View view) {
-        if (xlabel.getText().toString().equals("")) {
-            xl = 0;
-            if (ylabel.getText().toString().equals("")) {
-                yl = 0;
-            } else {
-                yl = Integer.parseInt(ylabel.getText().toString());
-            }
-        } else {
+        if (!xlabel.getText().toString().equals("") && !ylabel.getText().toString().equals("")) {
             xl = Integer.parseInt(xlabel.getText().toString());
-            if (ylabel.getText().toString().equals("")) {
-                yl = 0;
-            } else {
-                yl = Integer.parseInt(ylabel.getText().toString());
-            }
+            yl = Integer.parseInt(ylabel.getText().toString());
+        } else {
+            xl = 0;
+            yl = 0;
         }
         if (NotificationTask.isStarted) {
             this.stopFloatService(view);
