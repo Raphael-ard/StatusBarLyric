@@ -1,0 +1,11 @@
+<resources>
+    <string name="app_name">StatusBarLyric</string>
+    <string name="xnotice">悬浮窗X轴坐标：</string>
+    <string name="ynotice">悬浮窗Y轴坐标：</string>
+    <string name="startwindow" >开启悬浮窗</string>
+    <string name="help" >帮助信息</string>
+    <string name="stopwindow">关闭悬浮窗</string>
+    <string name="startnotification">开启通知歌词</string>
+    <string name="stopnotification">关闭通知歌词</string>
+    <string name="noticeservice">StatusBar歌词通知使用权</string>
+</resources>
