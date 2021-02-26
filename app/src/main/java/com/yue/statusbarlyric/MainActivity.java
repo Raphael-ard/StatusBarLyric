@@ -21,6 +21,8 @@ public class MainActivity extends AppCompatActivity {
 //x，y坐标
     private TextView xlabel;
     private TextView ylabel;
+    private int xl = 0;
+    private int yl = 0;
     private boolean voluntarily = false;
 //    权限相关
     private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
@@ -90,12 +92,27 @@ public class MainActivity extends AppCompatActivity {
 
     //授权，开启悬浮窗
     public void startFloatingService(View view) {
+        if (xlabel.getText().toString().equals("")) {
+            xl = 0;
+            if (ylabel.getText().toString().equals("")) {
+                yl = 0;
+            } else {
+                yl = Integer.parseInt(ylabel.getText().toString());
+            }
+        } else {
+            xl = Integer.parseInt(xlabel.getText().toString());
+            if (ylabel.getText().toString().equals("")) {
+                yl = 0;
+            } else {
+                yl = Integer.parseInt(ylabel.getText().toString());
+            }
+        }
         if (NotificationTask.isStarted) {
             this.stopFloatService(view);
             Intent intent = new Intent("yueServicelyrics");
             intent.putExtra("judgelyric",true);
-            intent.putExtra("x",Integer.parseInt(xlabel.getText().toString()));
-            intent.putExtra("y",Integer.parseInt(ylabel.getText().toString()));
+            intent.putExtra("x",xl);
+            intent.putExtra("y",yl);
             sendBroadcast(intent);
             startService(new Intent(MainActivity.this,NotificationTask.class));
         } else {
@@ -106,8 +123,8 @@ public class MainActivity extends AppCompatActivity {
                 } else {
                     Intent intent = new Intent("yueServicelyrics");
                     intent.putExtra("judgelyric",true);
-                    intent.putExtra("x",Integer.parseInt(xlabel.getText().toString()));
-                    intent.putExtra("y",Integer.parseInt(ylabel.getText().toString()));
+                    intent.putExtra("x",xl);
+                    intent.putExtra("y",yl);
                     sendBroadcast(intent);
                     startService(new Intent(MainActivity.this,NotificationTask.class));
                 }

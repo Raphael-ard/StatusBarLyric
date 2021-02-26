@@ -5,6 +5,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.provider.Settings;
@@ -56,7 +57,6 @@ public class NotificationTask  extends NotificationListenerService {
     @Override
     public void onDestroy() {
         this.unregisterReceiver(receiverlyrics);
-        System.out.println("Destroy");
         stopSelf();
         super.onDestroy();
     }
@@ -95,12 +95,10 @@ public class NotificationTask  extends NotificationListenerService {
             layoutParams.height = 100;
             layoutParams.x = xlabel;
             layoutParams.y = ylabel;
-            System.out.println("Start");
             showFloatWindow();
             Toast.makeText(NotificationTask.this, "Start", Toast.LENGTH_SHORT).show();
         } else {
             isStarted = false;
-            System.out.println("Stop");
             closeFloatWindow();
         }
         return super.onStartCommand(intent, flags, startId);
@@ -110,7 +108,6 @@ public class NotificationTask  extends NotificationListenerService {
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
         if (judgelyric) {
-            System.out.println("Posted");
             for (StatusBarNotification mn : getActiveNotifications()) {
                 if (mn.getPackageName() != null) {
                     if (mn.getPackageName().equals("com.netease.cloudmusic")) {
@@ -135,8 +132,7 @@ public class NotificationTask  extends NotificationListenerService {
     @SuppressLint("ClickableViewAccessibility")
     private void showFloatWindow() {
         if (Settings.canDrawOverlays(this)) {
-            System.out.println("show");
-//            txt.setTextColor(Color.BLACK);
+            txt.setTextColor(Color.WHITE);
             windowManager.addView(txt,layoutParams);
             txt.setOnTouchListener(new FloatingOntouchListener());
         }
@@ -144,7 +140,6 @@ public class NotificationTask  extends NotificationListenerService {
 
     private void closeFloatWindow() {
         if (Settings.canDrawOverlays(this)) {
-            System.out.println("Close");
             xlast = layoutParams.x;
             ylast = layoutParams.y;
             windowManager.removeView(txt);
