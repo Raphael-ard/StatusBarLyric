@@ -5,7 +5,6 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Build;
 import android.provider.Settings;
@@ -27,6 +26,8 @@ import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_TITLE;
 
 public class NotificationTask  extends NotificationListenerService {
     public String str = "";
+    public static int xlast;
+    public static int ylast;
 //歌词坐标，判断歌词是否显示出来
     private int xlabel;
     private int ylabel;
@@ -135,7 +136,7 @@ public class NotificationTask  extends NotificationListenerService {
     private void showFloatWindow() {
         if (Settings.canDrawOverlays(this)) {
             System.out.println("show");
-            txt.setTextColor(Color.BLACK);
+//            txt.setTextColor(Color.BLACK);
             windowManager.addView(txt,layoutParams);
             txt.setOnTouchListener(new FloatingOntouchListener());
         }
@@ -144,6 +145,8 @@ public class NotificationTask  extends NotificationListenerService {
     private void closeFloatWindow() {
         if (Settings.canDrawOverlays(this)) {
             System.out.println("Close");
+            xlast = layoutParams.x;
+            ylast = layoutParams.y;
             windowManager.removeView(txt);
         }
     }

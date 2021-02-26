@@ -21,6 +21,7 @@ public class MainActivity extends AppCompatActivity {
 //x，y坐标
     private TextView xlabel;
     private TextView ylabel;
+    private boolean voluntarily = false;
 //    权限相关
     private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
     public boolean isNotificationListenerEnabled(Context context) {
@@ -62,10 +63,32 @@ public class MainActivity extends AppCompatActivity {
             sendBroadcast(intent);
             startService(new Intent(MainActivity.this,NotificationTask.class));
         }
+        voluntarily = false;
         Toast.makeText(MainActivity.this, "已关闭FloatWindow", Toast.LENGTH_SHORT).show();
     }
 
-//授权，开启悬浮窗
+    @Override
+    protected void onStart() {
+        super.onStart();
+        while (voluntarily) {
+            Intent intent = new Intent("yueServicelyrics");
+            intent.putExtra("judgelyric",false);
+            sendBroadcast(intent);
+            startService(new Intent(MainActivity.this,NotificationTask.class));
+            Intent intent1 = new Intent("yueServicelyrics");
+            intent1.putExtra("judgelyric",true);
+            intent1.putExtra("x",NotificationTask.xlast);
+            intent1.putExtra("y",NotificationTask.ylast);
+            startService(new Intent(MainActivity.this,NotificationTask.class));
+            try {
+                Thread.sleep(1500);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }
+
+    //授权，开启悬浮窗
     public void startFloatingService(View view) {
         if (NotificationTask.isStarted) {
             this.stopFloatService(view);
@@ -92,6 +115,7 @@ public class MainActivity extends AppCompatActivity {
                 openNotificationAccess();
             }
         }
+        voluntarily = true;
         Toast.makeText(MainActivity.this, "已开启FloatWindow", Toast.LENGTH_SHORT).show();
     }
     @Override
