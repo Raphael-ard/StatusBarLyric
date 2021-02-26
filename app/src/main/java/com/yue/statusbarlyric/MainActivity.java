@@ -12,6 +12,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.View;
+import android.widget.Button;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -21,8 +22,10 @@ public class MainActivity extends AppCompatActivity {
 //x，y坐标
     private TextView xlabel;
     private TextView ylabel;
+    private TextView textsize;
     private int xl = 0;
     private int yl = 0;
+    private float si = 12;
     private boolean voluntarily = false;
 //    权限相关
     private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
@@ -41,6 +44,31 @@ public class MainActivity extends AppCompatActivity {
 
         xlabel = findViewById(R.id.xedit);
         ylabel = findViewById(R.id.yedit);
+        textsize = findViewById(R.id.textsize);
+
+        Button bt = findViewById(R.id.timerrefresh);
+        bt.setOnClickListener(v -> {
+            voluntarily = true;
+            new Thread(() -> {
+                while (voluntarily) {
+                    Intent intent = new Intent("yueServicelyrics");
+                    intent.putExtra("judgelyric",false);
+                    sendBroadcast(intent);
+                    startService(new Intent(MainActivity.this,NotificationTask.class));
+                    Intent intent1 = new Intent("yueServicelyrics");
+                    intent1.putExtra("judgelyric",true);
+                    intent1.putExtra("x",NotificationTask.xlast);
+                    intent1.putExtra("y",NotificationTask.ylast);
+                    intent1.putExtra("s",si);
+                    startService(new Intent(MainActivity.this,NotificationTask.class));
+                    try {
+                        Thread.sleep(1500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            });
+        });
 
         if (!load()) {
             ////////使用AlertDialog（弹出窗口信息），创建对象
@@ -59,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void stopFloatService(View view) {
+        voluntarily = false;
         if (NotificationTask.isStarted) {
             Intent intent = new Intent("yueServicelyrics");
             intent.putExtra("judgelyric",false);
@@ -69,35 +98,14 @@ public class MainActivity extends AppCompatActivity {
         Toast.makeText(MainActivity.this, "已关闭FloatWindow", Toast.LENGTH_SHORT).show();
     }
 
-    @Override
-    protected void onStart() {
-        super.onStart();
-        if (!Integer.toString(NotificationTask.xlast).equals("") && !Integer.toString(NotificationTask.ylast).equals("")) {
-            while (voluntarily) {
-                Intent intent = new Intent("yueServicelyrics");
-                intent.putExtra("judgelyric",false);
-                sendBroadcast(intent);
-                startService(new Intent(MainActivity.this,NotificationTask.class));
-                Intent intent1 = new Intent("yueServicelyrics");
-                intent1.putExtra("judgelyric",true);
-                intent1.putExtra("x",NotificationTask.xlast);
-                intent1.putExtra("y",NotificationTask.ylast);
-                startService(new Intent(MainActivity.this,NotificationTask.class));
-                try {
-                    Thread.sleep(1500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-    }
-
     //授权，开启悬浮窗
     public void startFloatingService(View view) {
-        if (!xlabel.getText().toString().equals("") && !ylabel.getText().toString().equals("")) {
+        if (!xlabel.getText().toString().equals("") && !ylabel.getText().toString().equals("") && !textsize.getText().toString().equals("")) {
             xl = Integer.parseInt(xlabel.getText().toString());
             yl = Integer.parseInt(ylabel.getText().toString());
+            si = Float.parseFloat(textsize.getText().toString());
         } else {
+            si = 0;
             xl = 0;
             yl = 0;
         }
@@ -107,9 +115,9 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra("judgelyric",true);
             intent.putExtra("x",xl);
             intent.putExtra("y",yl);
+            intent.putExtra("s",si);
             sendBroadcast(intent);
             startService(new Intent(MainActivity.this,NotificationTask.class));
-            voluntarily = true;
         } else {
             if (isNotificationListenerEnabled(this)) {
                 if (!Settings.canDrawOverlays(this)) {
@@ -122,7 +130,6 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("y",yl);
                     sendBroadcast(intent);
                     startService(new Intent(MainActivity.this,NotificationTask.class));
-                    voluntarily = true;
                 }
             } else {
                 openNotificationAccess();

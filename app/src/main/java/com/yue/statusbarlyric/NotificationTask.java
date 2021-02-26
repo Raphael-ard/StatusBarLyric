@@ -27,11 +27,13 @@ import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_TITLE;
 
 public class NotificationTask  extends NotificationListenerService {
     public String str = "";
-    public static int xlast;
-    public static int ylast;
+    public static int xlast = 0;
+    public static int ylast = 0;
+    public static int s;
 //歌词坐标，判断歌词是否显示出来
     private int xlabel;
     private int ylabel;
+    private float siz;
     private boolean judgelyric = false;
 //    接收上述几个参数的receiver
     private receiverlyrics receiverlyrics;
@@ -133,6 +135,7 @@ public class NotificationTask  extends NotificationListenerService {
     private void showFloatWindow() {
         if (Settings.canDrawOverlays(this)) {
             txt.setTextColor(Color.WHITE);
+            txt.setTextSize(siz);
             windowManager.addView(txt,layoutParams);
             txt.setOnTouchListener(new FloatingOntouchListener());
         }
@@ -188,6 +191,7 @@ public class NotificationTask  extends NotificationListenerService {
 //            x，y坐标
             xlabel = intent.getIntExtra("x",0);
             ylabel = intent.getIntExtra("y",0);
+            siz = intent.getFloatExtra("s",12);
         }
     }
 }

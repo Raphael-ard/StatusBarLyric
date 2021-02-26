@@ -8,4 +8,6 @@
     <string name="startnotification">开启通知歌词</string>
     <string name="stopnotification">关闭通知歌词</string>
     <string name="noticeservice">StatusBar歌词通知使用权</string>
+    <string name="timerstart">自动刷新歌词（一般不需要点此按钮）</string>
+    <string name="noticesize">字体大小：</string>
 </resources>

@@ -13,7 +13,7 @@
         android:orientation="horizontal">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="150dp"
             android:layout_height="match_parent"
             android:gravity="center"
             android:text="@string/xnotice"
@@ -31,7 +31,7 @@
         android:orientation="horizontal">
 
         <TextView
-            android:layout_width="wrap_content"
+            android:layout_width="150dp"
             android:layout_height="match_parent"
             android:gravity="center"
             android:text="@string/ynotice"
@@ -43,12 +43,37 @@
             android:layout_height="wrap_content" />
     </LinearLayout>
 
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+        <TextView
+            android:layout_width="150dp"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:text="@string/noticesize"
+            android:textSize="18sp" />
+
+        <EditText
+            android:id="@+id/textsize"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" />
+    </LinearLayout>
+
     <Button
         android:id="@+id/startwindow"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:onClick="startFloatingService"
         android:text="@string/startwindow"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/timerrefresh"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/timerstart"
         android:textSize="18sp" />
 
     <Button
