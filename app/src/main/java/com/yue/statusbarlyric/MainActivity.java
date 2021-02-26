@@ -72,20 +72,22 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onStart() {
         super.onStart();
-        while (voluntarily) {
-            Intent intent = new Intent("yueServicelyrics");
-            intent.putExtra("judgelyric",false);
-            sendBroadcast(intent);
-            startService(new Intent(MainActivity.this,NotificationTask.class));
-            Intent intent1 = new Intent("yueServicelyrics");
-            intent1.putExtra("judgelyric",true);
-            intent1.putExtra("x",NotificationTask.xlast);
-            intent1.putExtra("y",NotificationTask.ylast);
-            startService(new Intent(MainActivity.this,NotificationTask.class));
-            try {
-                Thread.sleep(1500);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        if (!Integer.toString(NotificationTask.xlast).equals("") && !Integer.toString(NotificationTask.ylast).equals("")) {
+            while (voluntarily) {
+                Intent intent = new Intent("yueServicelyrics");
+                intent.putExtra("judgelyric",false);
+                sendBroadcast(intent);
+                startService(new Intent(MainActivity.this,NotificationTask.class));
+                Intent intent1 = new Intent("yueServicelyrics");
+                intent1.putExtra("judgelyric",true);
+                intent1.putExtra("x",NotificationTask.xlast);
+                intent1.putExtra("y",NotificationTask.ylast);
+                startService(new Intent(MainActivity.this,NotificationTask.class));
+                try {
+                    Thread.sleep(1500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         }
     }
@@ -107,6 +109,7 @@ public class MainActivity extends AppCompatActivity {
             intent.putExtra("y",yl);
             sendBroadcast(intent);
             startService(new Intent(MainActivity.this,NotificationTask.class));
+            voluntarily = true;
         } else {
             if (isNotificationListenerEnabled(this)) {
                 if (!Settings.canDrawOverlays(this)) {
@@ -119,12 +122,12 @@ public class MainActivity extends AppCompatActivity {
                     intent.putExtra("y",yl);
                     sendBroadcast(intent);
                     startService(new Intent(MainActivity.this,NotificationTask.class));
+                    voluntarily = true;
                 }
             } else {
                 openNotificationAccess();
             }
         }
-        voluntarily = true;
         Toast.makeText(MainActivity.this, "已开启FloatWindow", Toast.LENGTH_SHORT).show();
     }
     @Override

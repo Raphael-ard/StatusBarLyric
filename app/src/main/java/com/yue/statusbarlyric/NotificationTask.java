@@ -140,6 +140,13 @@ public class NotificationTask  extends NotificationListenerService {
 
     private void closeFloatWindow() {
         if (Settings.canDrawOverlays(this)) {
+            if (!Integer.toString(layoutParams.x).equals("") && !Integer.toString(layoutParams.y).equals("")) {
+                xlast = layoutParams.x;
+                ylast = layoutParams.y;
+            } else {
+                xlast = 0;
+                ylast = 0;
+            }
             windowManager.removeView(txt);
         }
     }
@@ -169,13 +176,6 @@ public class NotificationTask  extends NotificationListenerService {
                     break;
                 default:
                     break;
-            }
-            if (!Integer.toString(layoutParams.x).equals("") && !Integer.toString(layoutParams.y).equals("")) {
-                xlast = layoutParams.x;
-                ylast = layoutParams.y;
-            } else {
-                xlast = 0;
-                ylast = 0;
             }
             return false;
         }
