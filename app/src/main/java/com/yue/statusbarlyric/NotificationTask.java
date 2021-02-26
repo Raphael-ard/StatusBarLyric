@@ -27,8 +27,8 @@ import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_TITLE;
 
 public class NotificationTask  extends NotificationListenerService {
     public String str = "";
-    public static int xlast;
-    public static int ylast;
+    public static int xlast = 0;
+    public static int ylast = 0;
 //歌词坐标，判断歌词是否显示出来
     private int xlabel;
     private int ylabel;
