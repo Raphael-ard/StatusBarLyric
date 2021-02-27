@@ -22,7 +22,8 @@
         <EditText
             android:id="@+id/xedit"
             android:layout_width="match_parent"
-            android:layout_height="match_parent" />
+            android:layout_height="match_parent"
+            android:text="30" />
     </LinearLayout>
 
     <LinearLayout
@@ -40,7 +41,8 @@
         <EditText
             android:id="@+id/yedit"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="40" />
     </LinearLayout>
 
     <LinearLayout
@@ -58,7 +60,8 @@
         <EditText
             android:id="@+id/textsize"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
+            android:layout_height="wrap_content"
+            android:text="15" />
     </LinearLayout>
 
     <Button
@@ -74,6 +77,13 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="@string/timerstart"
+        android:textSize="18sp" />
+
+    <Button
+        android:id="@+id/stoptimer"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="@string/stoptimer"
         android:textSize="18sp" />
 
     <Button

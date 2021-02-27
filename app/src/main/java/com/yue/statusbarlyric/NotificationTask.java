@@ -29,12 +29,12 @@ public class NotificationTask  extends NotificationListenerService {
     public String str = "";
     public static int xlast = 0;
     public static int ylast = 0;
-    public static int s;
 //歌词坐标，判断歌词是否显示出来
-    private int xlabel;
-    private int ylabel;
-    private float siz;
+    private int xlabel = 0;
+    private int ylabel = 0;
+    private float siz = 12;
     private boolean judgelyric = false;
+    private boolean startservice = false;
 //    接收上述几个参数的receiver
     private receiverlyrics receiverlyrics;
     private TextView txt;
@@ -58,9 +58,10 @@ public class NotificationTask  extends NotificationListenerService {
 
     @Override
     public void onDestroy() {
+        super.onDestroy();
+        System.out.println("Destroy");
         this.unregisterReceiver(receiverlyrics);
         stopSelf();
-        super.onDestroy();
     }
 
     private final MediaControllerCompat.Callback mMediaControllerCallback = new MediaControllerCompat.Callback() {
@@ -76,32 +77,34 @@ public class NotificationTask  extends NotificationListenerService {
     @SuppressLint("RtlHardcoded")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (judgelyric) {
-            isStarted = true;
+        if (startservice) {
+            if (judgelyric) {
+                isStarted = true;
 //            以悬浮窗形式
-            windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-            layoutParams = new WindowManager.LayoutParams();
-            //根据安卓版本进行悬浮窗选择
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                layoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+                layoutParams = new WindowManager.LayoutParams();
+                //根据安卓版本进行悬浮窗选择
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                    layoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+                } else {
+                    layoutParams.type = WindowManager.LayoutParams.TYPE_PHONE;
+                }
+                //透明
+                layoutParams.format = PixelFormat.RGBA_8888;
+                layoutParams.gravity = Gravity.LEFT | Gravity.TOP;
+                layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN ;
+                //初始位置
+                layoutParams.width = 1080;
+                layoutParams.height = 200;
+                layoutParams.x = xlabel;
+                layoutParams.y = ylabel;
+                showFloatWindow();
+                Toast.makeText(NotificationTask.this, "Start", Toast.LENGTH_SHORT).show();
             } else {
-                layoutParams.type = WindowManager.LayoutParams.TYPE_PHONE;
+                isStarted = false;
+                closeFloatWindow();
             }
-            //透明
-            layoutParams.format = PixelFormat.RGBA_8888;
-            layoutParams.gravity = Gravity.LEFT | Gravity.TOP;
-            layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN ;
-            //初始位置
-            layoutParams.width = 1000;
-            layoutParams.height = 100;
-            layoutParams.x = xlabel;
-            layoutParams.y = ylabel;
-            showFloatWindow();
-            Toast.makeText(NotificationTask.this, "Start", Toast.LENGTH_SHORT).show();
-        } else {
-            isStarted = false;
-            closeFloatWindow();
         }
         return super.onStartCommand(intent, flags, startId);
     }
@@ -188,6 +191,7 @@ public class NotificationTask  extends NotificationListenerService {
         @Override
         public void onReceive(Context context, Intent intent) {
             judgelyric = intent.getBooleanExtra("judgelyric",false);
+            startservice = intent.getBooleanExtra("startservice",false);
 //            x，y坐标
             xlabel = intent.getIntExtra("x",0);
             ylabel = intent.getIntExtra("y",0);
