@@ -78,26 +78,34 @@ public class NotificationTask  extends NotificationListenerService {
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
             super.onMetadataChanged(metadata);
-            //获取歌词信息
-            str = metadata.getString(METADATA_KEY_TITLE);
-            txt.setText(metadata.getString(METADATA_KEY_TITLE));
-//            防止死循环
-            if (str.equals(beginstr)) {
-                if (num <= 10) {
-                    num++;
-                    request();
+            if (judgelyric) {
+                //获取歌词信息
+                str = metadata.getString(METADATA_KEY_TITLE);
+                txt.setText(metadata.getString(METADATA_KEY_TITLE));
+//            防止死循环,迭代，不断发送请求，进行歌词更新（但是会极大占用内存）
+                if (str.equals(beginstr)) {
+                    if (num <= 10) {
+                        num++;
+                        request();
+                    } else {
+                        try {
+                            Thread.sleep(1500);
+                        } catch (InterruptedException e) {
+                            e.printStackTrace();
+                        }
+                        request();
+                    }
+                } else {
+                    num = 0;
+                    beginstr = str;
                 }
-            } else {
-                num = 0;
-                beginstr = str;
+                System.out.println(str);
             }
-            System.out.println(str);
         }
     };
 
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
-        request();
         super.onNotificationRemoved(sbn);
         request();
     }
@@ -157,7 +165,6 @@ public class NotificationTask  extends NotificationListenerService {
 //    通知出现变化
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        request();
         super.onNotificationPosted(sbn);
         request();
     }
