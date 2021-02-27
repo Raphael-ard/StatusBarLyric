@@ -8,6 +8,8 @@ import android.content.IntentFilter;
 import android.graphics.Color;
 import android.graphics.PixelFormat;
 import android.os.Build;
+import android.os.IBinder;
+import android.os.RemoteException;
 import android.provider.Settings;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.StatusBarNotification;
@@ -26,9 +28,9 @@ import androidx.media.app.NotificationCompat;
 import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_TITLE;
 
 public class NotificationTask  extends NotificationListenerService {
-    public String str = "";
     public static int xlast = 0;
     public static int ylast = 0;
+    public static float si = 12;
 //歌词坐标，判断歌词是否显示出来
     private int xlabel = 0;
     private int ylabel = 0;
@@ -58,48 +60,61 @@ public class NotificationTask  extends NotificationListenerService {
 
     @Override
     public void onDestroy() {
-        super.onDestroy();
         System.out.println("Destroy");
         this.unregisterReceiver(receiverlyrics);
         stopSelf();
+        super.onDestroy();
+    }
+
+    @Override
+    public IBinder onBind(Intent intent) {
+        return super.onBind(intent);
     }
 
     private final MediaControllerCompat.Callback mMediaControllerCallback = new MediaControllerCompat.Callback() {
         @Override
         public void onMetadataChanged(MediaMetadataCompat metadata) {
-            //获取歌词信息
-            str = metadata.getString(METADATA_KEY_TITLE);
-            txt.setText(str);
             super.onMetadataChanged(metadata);
+            //获取歌词信息
+            String str = metadata.getString(METADATA_KEY_TITLE);
+            txt.setText(metadata.getString(METADATA_KEY_TITLE));
+            System.out.println(str);
         }
     };
+
+    @Override
+    public void onNotificationRemoved(StatusBarNotification sbn) {
+        super.onNotificationRemoved(sbn);
+        request();
+    }
 
     @SuppressLint("RtlHardcoded")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
         if (startservice) {
+//            以悬浮窗形式
+            windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+            layoutParams = new WindowManager.LayoutParams();
+            //根据安卓版本进行悬浮窗选择
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                layoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+            } else {
+                layoutParams.type = WindowManager.LayoutParams.TYPE_PHONE;
+            }
+            //透明
+            layoutParams.format = PixelFormat.RGBA_8888;
+            layoutParams.gravity = Gravity.LEFT | Gravity.TOP;
+            layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN ;
+            //初始位置
+            layoutParams.width = 1080;
+            layoutParams.height = 100;
+            layoutParams.x = xlabel;
+            layoutParams.y = ylabel;
             if (judgelyric) {
                 isStarted = true;
-//            以悬浮窗形式
-                windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-                layoutParams = new WindowManager.LayoutParams();
-                //根据安卓版本进行悬浮窗选择
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                    layoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-                } else {
-                    layoutParams.type = WindowManager.LayoutParams.TYPE_PHONE;
-                }
-                //透明
-                layoutParams.format = PixelFormat.RGBA_8888;
-                layoutParams.gravity = Gravity.LEFT | Gravity.TOP;
-                layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                        | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN ;
-                //初始位置
-                layoutParams.width = 1080;
-                layoutParams.height = 200;
-                layoutParams.x = xlabel;
-                layoutParams.y = ylabel;
                 showFloatWindow();
+                request();
                 Toast.makeText(NotificationTask.this, "Start", Toast.LENGTH_SHORT).show();
             } else {
                 isStarted = false;
@@ -109,35 +124,34 @@ public class NotificationTask  extends NotificationListenerService {
         return super.onStartCommand(intent, flags, startId);
     }
 
-    //通知出现变化
-    @Override
-    public void onNotificationPosted(StatusBarNotification sbn) {
-        if (judgelyric) {
-            for (StatusBarNotification mn : getActiveNotifications()) {
-                if (mn.getPackageName() != null) {
-                    if (mn.getPackageName().equals("com.netease.cloudmusic")) {
-                        //判断通知类型
-                        MediaSessionCompat.Token sessiontoken = NotificationCompat.MediaStyle.getMediaSession(mn.getNotification());
-                        if (sessiontoken != null) {
-                            try {
-                                //获得控制器对象
-                                MediaControllerCompat mediaControllerCompat = new MediaControllerCompat(this,sessiontoken);
-                                mediaControllerCompat.registerCallback(mMediaControllerCallback);
-                            } catch (Exception e) {
-                                e.printStackTrace();
-                            }
-                        }
+    private void request() {
+        for (StatusBarNotification sbn : getActiveNotifications()) {
+            if (sbn.getPackageName().equals("com.netease.cloudmusic")) {
+                MediaSessionCompat.Token sessiontoken = NotificationCompat.MediaStyle.getMediaSession(sbn.getNotification());
+                if (sessiontoken != null) {
+                    try {
+                        MediaControllerCompat mediaControllerCompat = new MediaControllerCompat(NotificationTask.this,sessiontoken);
+                        mediaControllerCompat.registerCallback(mMediaControllerCallback);
+                    } catch (RemoteException e) {
+                        e.printStackTrace();
                     }
                 }
             }
         }
+    }
+
+//    通知出现变化
+    @Override
+    public void onNotificationPosted(StatusBarNotification sbn) {
+        System.out.println(sbn.getPackageName());
+        request();
         super.onNotificationPosted(sbn);
     }
 
     @SuppressLint("ClickableViewAccessibility")
     private void showFloatWindow() {
         if (Settings.canDrawOverlays(this)) {
-            txt.setTextColor(Color.WHITE);
+            txt.setTextColor(Color.BLUE);
             txt.setTextSize(siz);
             windowManager.addView(txt,layoutParams);
             txt.setOnTouchListener(new FloatingOntouchListener());
@@ -149,7 +163,9 @@ public class NotificationTask  extends NotificationListenerService {
             if (!Integer.toString(layoutParams.x).equals("") && !Integer.toString(layoutParams.y).equals("")) {
                 xlast = layoutParams.x;
                 ylast = layoutParams.y;
+                si = siz;
             } else {
+                si = 12;
                 xlast = 0;
                 ylast = 0;
             }

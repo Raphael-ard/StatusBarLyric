@@ -36,8 +36,8 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        stopService(new Intent(MainActivity.this,NotificationTask.class));
         super.onDestroy();
+        stopService(new Intent(MainActivity.this,NotificationTask.class));
     }
 
     @Override
@@ -59,33 +59,33 @@ public class MainActivity extends AppCompatActivity {
         ylabel = findViewById(R.id.yedit);
         textsize = findViewById(R.id.textsize);
 
-        Button bt = findViewById(R.id.timerrefresh);
-        bt.setOnClickListener(v -> {
-            if (NotificationTask.isStarted) {
-                new Thread(() -> {
-                    while (true) {
-                        Intent intent = new Intent("yueServicelyrics");
-                        intent.putExtra("startservice",true);
-                        intent.putExtra("judgelyric",false);
-                        intent.putExtra("x",NotificationTask.xlast);
-                        intent.putExtra("y",NotificationTask.ylast);
-                        intent.putExtra("s",si);
-                        sendBroadcast(intent);
-                        startService(new Intent(MainActivity.this,NotificationTask.class));
-                        Intent intent1 = new Intent("yueServicelyrics");
-                        intent1.putExtra("startservice",true);
-                        intent1.putExtra("judgelyric",true);
-                        intent1.putExtra("x",NotificationTask.xlast);
-                        intent1.putExtra("y",NotificationTask.ylast);
-                        intent1.putExtra("s",si);
-                        startService(new Intent(MainActivity.this,NotificationTask.class));
-                    }
-                });
-                Toast.makeText(MainActivity.this, "已开启自动刷新", Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(MainActivity.this, "请开启悬浮窗", Toast.LENGTH_SHORT).show();
-            }
-        });
+//        Button bt = findViewById(R.id.timerrefresh);
+//        bt.setOnClickListener(v -> {
+//            if (NotificationTask.isStarted) {
+//                new Thread(() -> {
+//                    while (true) {
+//                        Intent intent = new Intent("yueServicelyrics");
+//                        intent.putExtra("startservice",true);
+//                        intent.putExtra("judgelyric",false);
+//                        intent.putExtra("x",NotificationTask.xlast);
+//                        intent.putExtra("y",NotificationTask.ylast);
+//                        intent.putExtra("s",si);
+//                        sendBroadcast(intent);
+//                        startService(new Intent(MainActivity.this,NotificationTask.class));
+//                        Intent intent1 = new Intent("yueServicelyrics");
+//                        intent1.putExtra("startservice",true);
+//                        intent1.putExtra("judgelyric",true);
+//                        intent1.putExtra("x",NotificationTask.xlast);
+//                        intent1.putExtra("y",NotificationTask.ylast);
+//                        intent1.putExtra("s",si);
+//                        startService(new Intent(MainActivity.this,NotificationTask.class));
+//                    }
+//                });
+//                Toast.makeText(MainActivity.this, "已开启自动刷新", Toast.LENGTH_SHORT).show();
+//            } else {
+//                Toast.makeText(MainActivity.this, "请开启悬浮窗", Toast.LENGTH_SHORT).show();
+//            }
+//        });
 
         if (!load()) {
             ////////使用AlertDialog（弹出窗口信息），创建对象
@@ -128,7 +128,11 @@ public class MainActivity extends AppCompatActivity {
             yl = 0;
         }
         if (NotificationTask.isStarted) {
-            this.stopFloatService(view);
+            Intent intent1 = new Intent("yueServicelyrics");
+            intent1.putExtra("startservice",true);
+            intent1.putExtra("judgelyric",false);
+            sendBroadcast(intent1);
+            startService(new Intent(MainActivity.this,NotificationTask.class));
             Intent intent = new Intent("yueServicelyrics");
             intent.putExtra("judgelyric",true);
             intent.putExtra("startservice",true);
