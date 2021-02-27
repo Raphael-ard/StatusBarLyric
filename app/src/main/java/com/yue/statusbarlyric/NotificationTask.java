@@ -33,8 +33,11 @@ public class NotificationTask  extends NotificationListenerService {
     public static float si = 12;
 //歌词坐标，判断歌词是否显示出来
     private int xlabel = 0;
+    private String str = "Nothing";
+    private String beginstr = "";
     private int ylabel = 0;
     private float siz = 12;
+    private int num = 0;
     private boolean judgelyric = false;
     private boolean startservice = false;
 //    接收上述几个参数的receiver
@@ -49,7 +52,7 @@ public class NotificationTask  extends NotificationListenerService {
     @Override
     public void onCreate() {
         txt = new TextView(getApplicationContext());
-        txt.setText("Nothing");
+        txt.setText(str);
         //接收停止接收歌词信息通知广播
         receiverlyrics = new receiverlyrics();
         IntentFilter intentFilter1 = new IntentFilter();
@@ -76,14 +79,25 @@ public class NotificationTask  extends NotificationListenerService {
         public void onMetadataChanged(MediaMetadataCompat metadata) {
             super.onMetadataChanged(metadata);
             //获取歌词信息
-            String str = metadata.getString(METADATA_KEY_TITLE);
+            str = metadata.getString(METADATA_KEY_TITLE);
             txt.setText(metadata.getString(METADATA_KEY_TITLE));
+//            防止死循环
+            if (str.equals(beginstr)) {
+                if (num <= 10) {
+                    num++;
+                    request();
+                }
+            } else {
+                num = 0;
+                beginstr = str;
+            }
             System.out.println(str);
         }
     };
 
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
+        request();
         super.onNotificationRemoved(sbn);
         request();
     }
@@ -143,9 +157,9 @@ public class NotificationTask  extends NotificationListenerService {
 //    通知出现变化
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        System.out.println(sbn.getPackageName());
         request();
         super.onNotificationPosted(sbn);
+        request();
     }
 
     @SuppressLint("ClickableViewAccessibility")
