@@ -23,10 +23,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView xlabel;
     private TextView ylabel;
     private TextView textsize;
-    private int xl = 0;
-    private int yl = 0;
     private float si = 12;
-    private boolean voluntarily = false;
 //    权限相关
     private static final String ACTION_NOTIFICATION_LISTENER_SETTINGS = "android.settings.ACTION_NOTIFICATION_LISTENER_SETTINGS";
     public boolean isNotificationListenerEnabled(Context context) {
@@ -45,28 +42,6 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onStart() {
-        new Thread(() -> {
-            while (voluntarily) {
-                Intent intent = new Intent("yueServicelyrics");
-                intent.putExtra("startservice",true);
-                intent.putExtra("judgelyric",false);
-                sendBroadcast(intent);
-                startService(new Intent(MainActivity.this,NotificationTask.class));
-                Intent intent1 = new Intent("yueServicelyrics");
-                intent1.putExtra("startservice",true);
-                intent1.putExtra("judgelyric",true);
-                intent1.putExtra("x",NotificationTask.xlast);
-                intent1.putExtra("y",NotificationTask.ylast);
-                intent1.putExtra("s",si);
-                startService(new Intent(MainActivity.this,NotificationTask.class));
-                try {
-                    Thread.sleep(1500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }
-            }
-            System.out.println("While");
-        });
         super.onStart();
     }
 
@@ -87,17 +62,29 @@ public class MainActivity extends AppCompatActivity {
         Button bt = findViewById(R.id.timerrefresh);
         bt.setOnClickListener(v -> {
             if (NotificationTask.isStarted) {
-                voluntarily = true;
+                new Thread(() -> {
+                    while (true) {
+                        Intent intent = new Intent("yueServicelyrics");
+                        intent.putExtra("startservice",true);
+                        intent.putExtra("judgelyric",false);
+                        intent.putExtra("x",NotificationTask.xlast);
+                        intent.putExtra("y",NotificationTask.ylast);
+                        intent.putExtra("s",si);
+                        sendBroadcast(intent);
+                        startService(new Intent(MainActivity.this,NotificationTask.class));
+                        Intent intent1 = new Intent("yueServicelyrics");
+                        intent1.putExtra("startservice",true);
+                        intent1.putExtra("judgelyric",true);
+                        intent1.putExtra("x",NotificationTask.xlast);
+                        intent1.putExtra("y",NotificationTask.ylast);
+                        intent1.putExtra("s",si);
+                        startService(new Intent(MainActivity.this,NotificationTask.class));
+                    }
+                });
                 Toast.makeText(MainActivity.this, "已开启自动刷新", Toast.LENGTH_SHORT).show();
             } else {
                 Toast.makeText(MainActivity.this, "请开启悬浮窗", Toast.LENGTH_SHORT).show();
             }
-        });
-
-        Button btstop = findViewById(R.id.stoptimer);
-        btstop.setOnClickListener(v -> {
-            voluntarily = false;
-            Toast.makeText(MainActivity.this, "已关闭自动刷新", Toast.LENGTH_SHORT).show();
         });
 
         if (!load()) {
@@ -117,7 +104,6 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void stopFloatService(View view) {
-        voluntarily = false;
         if (NotificationTask.isStarted) {
             Intent intent = new Intent("yueServicelyrics");
             intent.putExtra("startservice",true);
@@ -130,6 +116,8 @@ public class MainActivity extends AppCompatActivity {
 
     //授权，开启悬浮窗
     public void startFloatingService(View view) {
+        int xl;
+        int yl;
         if (!xlabel.getText().toString().equals("") && !ylabel.getText().toString().equals("") && !textsize.getText().toString().equals("")) {
             xl = Integer.parseInt(xlabel.getText().toString().trim());
             yl = Integer.parseInt(ylabel.getText().toString().trim());
@@ -144,8 +132,8 @@ public class MainActivity extends AppCompatActivity {
             Intent intent = new Intent("yueServicelyrics");
             intent.putExtra("judgelyric",true);
             intent.putExtra("startservice",true);
-            intent.putExtra("x",xl);
-            intent.putExtra("y",yl);
+            intent.putExtra("x", xl);
+            intent.putExtra("y", yl);
             intent.putExtra("s",si);
             sendBroadcast(intent);
             startService(new Intent(MainActivity.this,NotificationTask.class));
@@ -158,8 +146,8 @@ public class MainActivity extends AppCompatActivity {
                     Intent intent = new Intent("yueServicelyrics");
                     intent.putExtra("judgelyric",true);
                     intent.putExtra("startservice",true);
-                    intent.putExtra("x",xl);
-                    intent.putExtra("y",yl);
+                    intent.putExtra("x", xl);
+                    intent.putExtra("y", yl);
                     intent.putExtra("s",si);
                     sendBroadcast(intent);
                     startService(new Intent(MainActivity.this,NotificationTask.class));
