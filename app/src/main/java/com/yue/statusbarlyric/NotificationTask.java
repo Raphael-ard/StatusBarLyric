@@ -22,8 +22,8 @@ import android.view.View;
 import android.view.WindowManager;
 import android.widget.TextView;
 import android.widget.Toast;
-import androidx.media.app.NotificationCompat;
 
+import androidx.media.app.NotificationCompat;
 
 import static android.support.v4.media.MediaMetadataCompat.METADATA_KEY_TITLE;
 
@@ -34,14 +34,12 @@ public class NotificationTask  extends NotificationListenerService {
 //歌词坐标，判断歌词是否显示出来
     private int xlabel = 0;
     private String str = "Nothing";
-    private String beginstr = "";
     private int ylabel = 0;
     private float siz = 12;
-    private int num = 0;
     private boolean judgelyric = false;
-    private boolean startservice = false;
+    private boolean stopfloat = false;
 //    接收上述几个参数的receiver
-    private receiverlyrics receiverlyrics;
+    private final receiverlyrics receiverlyrics = new receiverlyrics();;
     private TextView txt;
     public static boolean isStarted = false;
 //悬浮窗
@@ -51,22 +49,20 @@ public class NotificationTask  extends NotificationListenerService {
     @SuppressLint("SetTextI18n")
     @Override
     public void onCreate() {
+        super.onCreate();
         txt = new TextView(getApplicationContext());
         txt.setText(str);
         //接收停止接收歌词信息通知广播
-        receiverlyrics = new receiverlyrics();
         IntentFilter intentFilter1 = new IntentFilter();
         intentFilter1.addAction("yueServicelyrics");
         registerReceiver(receiverlyrics,intentFilter1);
-        super.onCreate();
     }
 
     @Override
     public void onDestroy() {
-        System.out.println("Destroy");
+        super.onDestroy();
         this.unregisterReceiver(receiverlyrics);
         stopSelf();
-        super.onDestroy();
     }
 
     @Override
@@ -79,69 +75,66 @@ public class NotificationTask  extends NotificationListenerService {
         public void onMetadataChanged(MediaMetadataCompat metadata) {
             super.onMetadataChanged(metadata);
             if (judgelyric) {
-                //获取歌词信息
                 str = metadata.getString(METADATA_KEY_TITLE);
-                txt.setText(metadata.getString(METADATA_KEY_TITLE));
-//            防止死循环,迭代，不断发送请求，进行歌词更新（但是会极大占用内存）
-                if (str.equals(beginstr)) {
-                    if (num <= 10) {
-                        num++;
-                        request();
-                    } else {
-                        try {
-                            Thread.sleep(1500);
-                        } catch (InterruptedException e) {
-                            e.printStackTrace();
-                        }
-                        request();
-                    }
-                } else {
-                    num = 0;
-                    beginstr = str;
-                }
                 System.out.println(str);
+               //            迭代，不断发送请求，进行歌词更新（但是会极大占用内存）
+//                if (str.equals(beginstr)) {
+//                    if (num <= 10) {
+//                        num++;
+//                        try {
+//                            Thread.sleep(500);
+//                        } catch (InterruptedException e) {
+//                            e.printStackTrace();
+//                        }
+//                        request();
+//                        txt.setText(metadata.getString(str));
+//                        return;
+//                    }
+//                } else {
+//                    num = 0;
+//                    beginstr = str;
+//                }
+                txt.setText(metadata.getString(metadata.METADATA_KEY_TITLE));
             }
         }
     };
 
     @Override
     public void onNotificationRemoved(StatusBarNotification sbn) {
-        super.onNotificationRemoved(sbn);
+//        super.onNotificationRemoved(sbn);
         request();
     }
 
     @SuppressLint("RtlHardcoded")
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (startservice) {
 //            以悬浮窗形式
-            windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
-            layoutParams = new WindowManager.LayoutParams();
-            //根据安卓版本进行悬浮窗选择
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                layoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
-            } else {
-                layoutParams.type = WindowManager.LayoutParams.TYPE_PHONE;
-            }
-            //透明
-            layoutParams.format = PixelFormat.RGBA_8888;
-            layoutParams.gravity = Gravity.LEFT | Gravity.TOP;
-            layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
-                    | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN ;
-            //初始位置
-            layoutParams.width = 1080;
-            layoutParams.height = 100;
-            layoutParams.x = xlabel;
-            layoutParams.y = ylabel;
-            if (judgelyric) {
-                isStarted = true;
-                showFloatWindow();
-                request();
-                Toast.makeText(NotificationTask.this, "Start", Toast.LENGTH_SHORT).show();
-            } else {
-                isStarted = false;
-                closeFloatWindow();
-            }
+        windowManager = (WindowManager) getSystemService(WINDOW_SERVICE);
+        layoutParams = new WindowManager.LayoutParams();
+        //根据安卓版本进行悬浮窗选择
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            layoutParams.type = WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        } else {
+            layoutParams.type = WindowManager.LayoutParams.TYPE_PHONE;
+        }
+        //透明
+        layoutParams.format = PixelFormat.RGBA_8888;
+        layoutParams.gravity = Gravity.LEFT | Gravity.TOP;
+        layoutParams.flags = WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL | WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE
+                | WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS | WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN ;
+        //初始位置
+        layoutParams.width = 1080;
+        layoutParams.height = 100;
+        layoutParams.x = xlabel;
+        layoutParams.y = ylabel;
+        if (judgelyric && !stopfloat) {
+            isStarted = true;
+            showFloatWindow();
+            Toast.makeText(NotificationTask.this, "Start", Toast.LENGTH_SHORT).show();
+        }
+        if (stopfloat && !judgelyric) {
+            isStarted = false;
+            closeFloatWindow();
         }
         return super.onStartCommand(intent, flags, startId);
     }
@@ -165,7 +158,7 @@ public class NotificationTask  extends NotificationListenerService {
 //    通知出现变化
     @Override
     public void onNotificationPosted(StatusBarNotification sbn) {
-        super.onNotificationPosted(sbn);
+//        super.onNotificationPosted(sbn);
         request();
     }
 
@@ -227,12 +220,16 @@ public class NotificationTask  extends NotificationListenerService {
     private class receiverlyrics extends BroadcastReceiver {
         @Override
         public void onReceive(Context context, Intent intent) {
-            judgelyric = intent.getBooleanExtra("judgelyric",false);
-            startservice = intent.getBooleanExtra("startservice",false);
+            if (intent != null && intent.getAction() != null) {
+                if (intent.getAction().equals("yueServicelyrics")) {
+                    judgelyric = intent.getBooleanExtra("judgelyric",false);
+                    stopfloat = intent.getBooleanExtra("stopfloat",false);
 //            x，y坐标
-            xlabel = intent.getIntExtra("x",0);
-            ylabel = intent.getIntExtra("y",0);
-            siz = intent.getFloatExtra("s",12);
+                    xlabel = intent.getIntExtra("x",0);
+                    ylabel = intent.getIntExtra("y",0);
+                    siz = intent.getFloatExtra("s",12);
+                }
+            }
         }
     }
 }
