@@ -66,7 +66,7 @@ public class MainActivity extends AppCompatActivity {
             alert.setIcon(R.drawable.ic_launcher_foreground);
             alert.setMessage("本应用需要使用通知权限，但不需要联网权限，不放心可以将网络权限关闭。\n本应用目前只适配网易云音乐。\n使用本应用需要将应用保留在后台。" +
                     "\n使用状态栏歌词只需点击“开启歌词悬浮窗”即可。\n使用前需要先点击两次“开启歌词悬浮窗按钮”，开启相应权限。\n" +
-                    "未经允许不可传播本应用！！！\n未经允许不可传播本应用！！！\n未经允许不可传播本应用！！！\n\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t——————————龠");
+                    "\n\n\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t\t——————————龠");
             alert.setButton(AlertDialog.BUTTON_POSITIVE, "已阅", (dialog, which) -> { });
             alert.setCancelable(true);
             save();

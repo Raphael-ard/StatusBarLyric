@@ -39,7 +39,7 @@ public class NotificationTask  extends NotificationListenerService {
     private boolean judgelyric = false;
     private boolean stopfloat = false;
 //    接收上述几个参数的receiver
-    private final receiverlyrics receiverlyrics = new receiverlyrics();;
+    private final receiverlyrics receiverlyrics = new receiverlyrics();
     private TextView txt;
     public static boolean isStarted = false;
 //悬浮窗
@@ -94,7 +94,7 @@ public class NotificationTask  extends NotificationListenerService {
 //                    num = 0;
 //                    beginstr = str;
 //                }
-                txt.setText(metadata.getString(metadata.METADATA_KEY_TITLE));
+                txt.setText(metadata.getString(METADATA_KEY_TITLE));
             }
         }
     };
